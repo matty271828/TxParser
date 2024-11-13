@@ -1,12 +1,24 @@
 package parser
 
+import (
+	"txparser/internal/ethereum"
+	"txparser/internal/storer"
+)
+
 type Manager struct {
-	// TODO: Add dependencies
+	ethClient *ethereum.Client
+	storer    storer.Storer
 }
 
 // NewManager creates a new parser manager.
-func NewManager() (*Manager, error) {
-	return &Manager{}, nil
+func NewManager(
+	ethClient *ethereum.Client,
+	storer storer.Storer,
+) (*Manager, error) {
+	return &Manager{
+		ethClient: ethClient,
+		storer:    storer,
+	}, nil
 }
 
 func (m *Manager) GetCurrentBlock() (int, error) {
