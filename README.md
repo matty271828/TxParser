@@ -12,23 +12,23 @@ Required operations:
 
 ## Design 
 
-### cmd
-The main entry point for the application.
+    ### cmd
+    The main entry point for the application.
 
-### internal
-Contains the core logic of the application.
+    ### internal
+    Contains the core logic of the application.
 
-    #### parser
-    Contains the public interface for the parser and parsing logic.
+        #### parser
+        Contains the public interface for the parser and parsing logic.
 
-    #### server
-    Http server implementation to serve api requests from the user to the parser. 
+        #### server
+        Http server implementation to serve api requests from the user to the parser. 
 
-    #### ethereum
-    Interact with the ethereum blockchain via Ethereum JSONRPC. 
+        #### ethereum
+        Interact with the ethereum blockchain via Ethereum JSONRPC. 
 
-    #### storer
-    In memory store for data. Could be extended in the future to connect to a database.
+        #### storer
+        In memory store for data. Could be extended in the future to connect to a database.
 
 ## Development Practices
 -  Testing via automated tests
