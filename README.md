@@ -24,7 +24,7 @@ Required operations:
         #### server
         Http server implementation to serve api requests from the user to the parser. 
 
-        #### ethereum
+        #### ethclient
         Interact with the ethereum blockchain via Ethereum JSONRPC. 
 
         #### storer

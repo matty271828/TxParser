@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"txparser/internal/ethereum"
+	"txparser/internal/ethclient"
 	"txparser/internal/parser"
 	"txparser/internal/server"
 	"txparser/internal/storer"
@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// Initialize Ethereum client to interact with the blockchain
-	ethClient, err := ethereum.NewClient()
+	ethClient, err := ethclient.NewEthClient()
 	if err != nil {
 		log.Fatal("Failed to initialize Ethereum client:", err)
 	}

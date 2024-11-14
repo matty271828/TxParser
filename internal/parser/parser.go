@@ -1,18 +1,18 @@
 package parser
 
 import (
-	"txparser/internal/ethereum"
+	"txparser/internal/ethclient"
 	"txparser/internal/storer"
 )
 
 type Manager struct {
-	ethClient *ethereum.Client
+	ethClient *ethclient.EthClient
 	storer    storer.Storer
 }
 
 // NewManager creates a new parser manager.
 func NewManager(
-	ethClient *ethereum.Client,
+	ethClient *ethclient.EthClient,
 	storer storer.Storer,
 ) (*Manager, error) {
 	return &Manager{
