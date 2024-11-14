@@ -7,6 +7,10 @@
 *.dll
 *.so
 *.dylib
+# Ignore all files in root without extension (binaries)
+*
+!*.*
+!*/
 
 # Test binary, built with `go test -c`
 *.test
