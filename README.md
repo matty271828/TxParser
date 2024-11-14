@@ -44,25 +44,25 @@ Required operations:
 ### Running the application
 
 1. Build and run the application
-    ```bash
-    go build -o txparser ./cmd/main.go
+```bash
+go build -o txparser ./cmd/main.go
 
-    ./txparser
-    ```
+./txparser
+```
 
 2. Hit some endpoints
 
-    - Subscribe to an address
-    ```bash
-    curl "http://localhost:8080/subscribe?address=0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-    ``` 
+- Subscribe to an address
+```bash
+curl "http://localhost:8080/subscribe?address=0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+``` 
 
-    - Get the current block number
-    ```bash
-    curl "http://localhost:8080/getcurrentblock"
-    ```
+- Get the current block number
+```bash
+curl "http://localhost:8080/getcurrentblock"
+```
 
-    - Get transactions for an address
-    ```bash
-    curl "http://localhost:8080/gettransactions?address=0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
-    ``` 
+- Get transactions for an address
+```bash
+curl "http://localhost:8080/gettransactions?address=0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
+``` 
