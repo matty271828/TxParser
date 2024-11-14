@@ -2,30 +2,27 @@ package main
 
 import (
 	"log"
-	"txparser/internal/ethclient"
-	"txparser/internal/parser"
-	"txparser/internal/server"
-	"txparser/internal/storer"
+	"txparser/internal"
 )
 
 func main() {
 	// Initialize Ethereum client to interact with the blockchain
-	ethClient, err := ethclient.NewEthClient()
+	ethClient, err := internal.NewEthClient()
 	if err != nil {
 		log.Fatal("Failed to initialize Ethereum client:", err)
 	}
 
 	// Initialize storage (in-memory for now)
-	storer := storer.NewStorer()
+	storer := internal.NewStorer()
 
 	// Initialize the parser with the Ethereum client and storage
-	parser, err := parser.NewManager(ethClient, storer)
+	parser, err := internal.NewManager(ethClient, storer)
 	if err != nil {
 		log.Fatal("Failed to initialize parser:", err)
 	}
 
 	// Initialize the HTTP server with the parser
-	s, err := server.NewServer(parser)
+	s, err := internal.NewServer(parser)
 	if err != nil {
 		log.Fatal("Failed to initialize server:", err)
 	}

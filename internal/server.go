@@ -1,9 +1,28 @@
-package server
+package internal
 
 import (
 	"encoding/json"
 	"net/http"
 )
+
+type Server struct {
+	parser Parser
+}
+
+func NewServer(parser Parser) (*Server, error) {
+	return &Server{parser: parser}, nil
+}
+
+func (s *Server) Start(port string) error {
+	mux := http.NewServeMux()
+
+	// Note: If I had more time I would add enforcement of HTTP methods.
+	mux.HandleFunc("/subscribe", s.HandleSubscribe)
+	mux.HandleFunc("/getcurrentblock", s.HandleGetCurrentBlock)
+	mux.HandleFunc("/gettransactions", s.HandleGetTransactions)
+
+	return http.ListenAndServe(port, mux)
+}
 
 // HandleGetCurrentBlock returns the current block number.
 // Returns an error if the current block number cannot be retrieved.

@@ -1,4 +1,4 @@
-package storer
+package internal
 
 import "sync"
 

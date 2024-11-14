@@ -1,4 +1,4 @@
-package ethclient
+package internal
 
 import (
 	"bytes"
