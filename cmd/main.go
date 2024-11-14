@@ -16,10 +16,7 @@ func main() {
 	}
 
 	// Initialize storage (in-memory for now)
-	storer, err := storer.NewManager()
-	if err != nil {
-		log.Fatal("Failed to initialize storage:", err)
-	}
+	storer := storer.NewStorer()
 
 	// Initialize the parser with the Ethereum client and storage
 	parser, err := parser.NewManager(ethClient, storer)

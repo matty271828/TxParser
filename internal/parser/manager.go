@@ -4,13 +4,13 @@ package parser
 // to interact with the ethereum blockchain.
 type Parser interface {
 	// Get the last parsed block number.
-	GetCurrentBlock() (int, error)
+	GetCurrentBlock() int
 
 	// Add an address to the observer.
-	SubscribeAddress(address string) error
+	SubscribeAddress(address string) bool
 
 	// List of outbound or inbound transactions for a given address.
-	GetTransactions(address string) ([]Transaction, error)
+	GetTransactions(address string) []Transaction
 }
 
 // Represents a transaction on the ethereum blockchain.

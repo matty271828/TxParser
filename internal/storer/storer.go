@@ -1,35 +1,28 @@
 package storer
 
-type Manager struct {
-	// TODO: Add dependencies
+import "sync"
+
+// Storer is an in-memory storer for subscribed addresses.
+// This could be later repurposed to connect to a database.
+type Storer struct {
+	subscribedAddrs map[string]bool
+	mu              sync.RWMutex // Mutex to safely access the data in concurrent scenarios
 }
 
-// Represents a transaction on the ethereum blockchain.
-type Transaction struct {
-	// Hash of the transaction.
-	Hash string
-	// Address of the sender.
-	From string
-	// Address of the receiver.
-	To string
-	// Value of the transaction in ETH.
-	Value string
+// NewStorer initializes a new Storer.
+func NewStorer() *Storer {
+	return &Storer{
+		subscribedAddrs: make(map[string]bool),
+	}
 }
 
-func NewManager() (*Manager, error) {
-	return &Manager{}, nil
-}
-
-func (m *Manager) SaveTransaction(address string, tx Transaction) {
-	// TODO: Implement
-}
-
-func (m *Manager) GetTransactions(address string) []Transaction {
-	// TODO: Implement
-	return nil
-}
-
-func (m *Manager) Subscribe(address string) bool {
-	// TODO: Implement
-	return false
+// Subscribe subscribes to notifications for a given address.
+func (s *Storer) Subscribe(address string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, exists := s.subscribedAddrs[address]; exists {
+		return false
+	}
+	s.subscribedAddrs[address] = true
+	return true
 }
