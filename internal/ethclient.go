@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -35,12 +36,14 @@ func NewEthClient() (*EthClient, error) {
 func (c *EthClient) Execute(body []byte) (map[string]interface{}, error) {
 	resp, err := c.client.Post(c.rpcURL, "application/json", bytes.NewReader(body))
 	if err != nil {
+		log.Printf("Error making HTTP request: %v", err)
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	var response map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		log.Printf("Error decoding response: %v", err)
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 

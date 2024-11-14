@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 )
 
 // Public interface that defines operations that can be performed
@@ -59,18 +60,21 @@ func (m *Manager) GetCurrentBlock() int {
 		"id":      1,
 	})
 	if err != nil {
+		log.Printf("Error marshaling block number request: %v", err)
 		return -1
 	}
 
 	// Send request using ethclient
 	response, err := m.ethClient.Execute(body)
 	if err != nil {
+		log.Printf("Error getting current block: %v", err)
 		return -1
 	}
 
 	// Handle response
 	result, ok := response["result"].(string)
 	if !ok {
+		log.Printf("Error parsing block number response: invalid format")
 		return -1
 	}
 
@@ -88,6 +92,7 @@ func (m *Manager) SubscribeAddress(address string) bool {
 // GetTransactions returns all transactions for a given address.
 func (m *Manager) GetTransactions(address string) []Transaction {
 	if address == "" {
+		log.Printf("Error: empty address provided")
 		return nil
 	}
 
@@ -107,11 +112,13 @@ func (m *Manager) GetTransactions(address string) []Transaction {
 
 	body, err := json.Marshal(params)
 	if err != nil {
+		log.Printf("Error marshaling transaction request: %v", err)
 		return nil
 	}
 
 	response, err := m.ethClient.Execute(body)
 	if err != nil {
+		log.Printf("Error getting transactions: %v", err)
 		return nil
 	}
 

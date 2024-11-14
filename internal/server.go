@@ -2,6 +2,7 @@ package internal
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -27,6 +28,7 @@ func (s *Server) Start(port string) error {
 // HandleGetCurrentBlock returns the current block number.
 // Returns an error if the current block number cannot be retrieved.
 func (s *Server) HandleGetCurrentBlock(w http.ResponseWriter, r *http.Request) {
+	log.Printf("API Request: GetCurrentBlock - %s", r.URL.String())
 	blockNumber := s.parser.GetCurrentBlock()
 	if blockNumber == -1 {
 		http.Error(w, "Failed to get current block", http.StatusInternalServerError)
@@ -44,6 +46,7 @@ func (s *Server) HandleGetCurrentBlock(w http.ResponseWriter, r *http.Request) {
 // HandleSubscribe subscribes to notifications for a given address.
 // Returns an error if the address is not provided or if the subscription fails.
 func (s *Server) HandleSubscribe(w http.ResponseWriter, r *http.Request) {
+	log.Printf("API Request: Subscribe - %s", r.URL.String())
 	address := r.URL.Query().Get("address")
 	if address == "" {
 		http.Error(w, "Address parameter is required", http.StatusBadRequest)
@@ -67,14 +70,17 @@ func (s *Server) HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 // HandleGetTransactions returns all transactions for a given address.
 // Returns an error if the address is not provided or if the transactions cannot be retrieved.
 func (s *Server) HandleGetTransactions(w http.ResponseWriter, r *http.Request) {
+	log.Printf("API Request: GetTransactions - %s", r.URL.String())
 	address := r.URL.Query().Get("address")
 	if address == "" {
+		log.Printf("Error: missing address parameter")
 		http.Error(w, "Address parameter is required", http.StatusBadRequest)
 		return
 	}
 
 	transactions := s.parser.GetTransactions(address)
 	if transactions == nil {
+		log.Printf("Error: failed to get transactions for address %s", address)
 		http.Error(w, "Failed to get transactions", http.StatusInternalServerError)
 		return
 	}
@@ -84,5 +90,9 @@ func (s *Server) HandleGetTransactions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Printf("Error encoding response: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 }
