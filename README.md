@@ -54,7 +54,7 @@ go build -o txparser ./cmd/main.go
 
 - Subscribe to an address
 ```bash
-curl "http://localhost:8080/subscribe?address=0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
+curl "http://localhost:8080/subscribe?address=0xa7fb5ca286fc3fd67525629048a4de3ba24cba2e"
 ``` 
 
 - Get the current block number
@@ -64,5 +64,5 @@ curl "http://localhost:8080/getcurrentblock"
 
 - Get transactions for an address
 ```bash
-curl "http://localhost:8080/gettransactions?address=0x0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
+curl "http://localhost:8080/gettransactions?address=0xa7fb5ca286fc3fd67525629048a4de3ba24cba2e"
 ``` 

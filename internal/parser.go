@@ -102,6 +102,10 @@ type getBlockByNumResponse struct {
 // GetTransactions returns all transactions for a given address.
 //
 // Note: In reality I would spend time adding pagination to this method.
+// We are also only checking the latest block here, in reality we would
+// need to go back through multiple blocks. Another thing we would need to
+// handle is filtering out transactions returned that do not match the address
+// specified in the search parameter.
 func (m *Manager) GetTransactions(address string) []Transaction {
 	currentBlock := m.GetCurrentBlock()
 	if currentBlock == -1 {
@@ -145,5 +149,6 @@ func (m *Manager) GetTransactions(address string) []Transaction {
 	if len(getBlockByNumResponse.Transactions) == 0 {
 		return []Transaction{}
 	}
+
 	return getBlockByNumResponse.Transactions
 }
