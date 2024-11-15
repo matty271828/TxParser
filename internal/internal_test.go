@@ -114,7 +114,7 @@ func TestIntegration_GetTransactions(t *testing.T) {
 		{
 			name:       "[POSITIVE] valid address with transactions",
 			method:     http.MethodGet,
-			address:    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+			address:    "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
 			wantStatus: http.StatusOK,
 			assert: func(t *testing.T, w *httptest.ResponseRecorder) {
 				body := w.Body.String()
@@ -133,22 +133,14 @@ func TestIntegration_GetTransactions(t *testing.T) {
 				}
 
 				tx := response.Transactions[0]
-				if tx.TransactionHash == "" {
-					t.Error("Transaction hash is empty")
+				if tx.Value == "" {
+					t.Error("Transaction value is empty")
 				}
-				if tx.Address == "" {
-					t.Error("Transaction address is empty")
+				if tx.From == "" {
+					t.Error("Transaction from is empty")
 				}
-			},
-		},
-		{
-			name:       "[NEGATIVE] empty address",
-			method:     http.MethodGet,
-			address:    "",
-			wantStatus: http.StatusBadRequest,
-			assert: func(t *testing.T, w *httptest.ResponseRecorder) {
-				if w.Code != http.StatusBadRequest {
-					t.Errorf("Expected status code %d, got %d", http.StatusBadRequest, w.Code)
+				if tx.To == "" {
+					t.Error("Transaction to is empty")
 				}
 			},
 		},

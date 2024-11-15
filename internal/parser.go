@@ -21,15 +21,19 @@ type Parser interface {
 
 // Represents a transaction on the ethereum blockchain.
 type Transaction struct {
-	Address          string   `json:"address"`
-	BlockHash        string   `json:"blockHash"`
-	BlockNumber      string   `json:"blockNumber"`
-	Data             string   `json:"data"`
-	LogIndex         string   `json:"logIndex"`
-	Removed          bool     `json:"removed"`
-	Topics           []string `json:"topics"`
-	TransactionHash  string   `json:"transactionHash"`
-	TransactionIndex string   `json:"transactionIndex"`
+	BlockHash        string `json:"blockHash"`
+	BlockNumber      string `json:"blockNumber"`
+	From             string `json:"from"`
+	Gas              string `json:"gas"`
+	GasPrice         string `json:"gasPrice"`
+	Hash             string `json:"hash"`
+	Input            string `json:"input"`
+	Nonce            string `json:"nonce"`
+	To               string `json:"to"`
+	TransactionIndex string `json:"transactionIndex"`
+	Value            string `json:"value"`
+	Type             string `json:"type"`
+	ChainId          string `json:"chainId"`
 }
 
 type Manager struct {
@@ -87,59 +91,59 @@ func (m *Manager) SubscribeAddress(address string) bool {
 	return m.storer.Subscribe(address)
 }
 
+type getBlockByNumResponse struct {
+	Number           string        `json:"number"`
+	Hash             string        `json:"hash"`
+	Transactions     []Transaction `json:"transactions"`
+	TransactionsRoot string        `json:"transactionsRoot"`
+	ParentHash       string        `json:"parentHash"`
+}
+
 // GetTransactions returns all transactions for a given address.
+//
+// Note: In reality I would spend time adding pagination to this method.
 func (m *Manager) GetTransactions(address string) []Transaction {
-	// Create filter with properly formatted hex values
+	currentBlock := m.GetCurrentBlock()
+	if currentBlock == -1 {
+		log.Printf("Error getting current block")
+		return nil
+	}
+
+	blockNumHex := fmt.Sprintf("0x%x", currentBlock)
 	body, err := json.Marshal(map[string]interface{}{
 		"jsonrpc": "2.0",
-		"method":  "eth_getLogs",
+		"method":  "eth_getBlockByNumber",
 		"params": []interface{}{
-			map[string]interface{}{
-				"address": address,
-			},
+			blockNumHex,
+			true,
 		},
 		"id": 1,
 	})
 	if err != nil {
-		log.Printf("Error marshaling logs request: %v", err)
+		log.Printf("Error marshaling block request: %v", err)
 		return nil
 	}
-
-	log.Printf("Sending request: %s", string(body))
 
 	response, err := m.ethClient.Execute(body)
 	if err != nil {
-		log.Printf("Error getting logs: %v", err)
+		log.Printf("Error executing request: %v", err)
 		return nil
 	}
 
-	var logs []Transaction
-	logsData, err := json.Marshal(response.Result)
+	// Marshal and unmarshal to convert from interface{} to our struct
+	resultBytes, err := json.Marshal(response.Result)
 	if err != nil {
-		log.Printf("Error marshaling logs data: %v", err)
+		log.Printf("Error marshaling result: %v", err)
+		return nil
+	}
+	var getBlockByNumResponse getBlockByNumResponse
+	if err := json.Unmarshal(resultBytes, &getBlockByNumResponse); err != nil {
+		log.Printf("Error decoding block data: %v", err)
 		return nil
 	}
 
-	if err := json.Unmarshal(logsData, &logs); err != nil {
-		log.Printf("Error unmarshaling logs: %v", err)
-		return nil
+	if len(getBlockByNumResponse.Transactions) == 0 {
+		return []Transaction{}
 	}
-
-	var transactions []Transaction
-	for _, log := range logs {
-		tx := Transaction{
-			Address:          log.Address,
-			BlockHash:        log.BlockHash,
-			BlockNumber:      log.BlockNumber,
-			Data:             log.Data,
-			LogIndex:         log.LogIndex,
-			Topics:           log.Topics,
-			TransactionHash:  log.TransactionHash,
-			TransactionIndex: log.TransactionIndex,
-		}
-		transactions = append(transactions, tx)
-	}
-
-	log.Printf("Found %d transactions", len(transactions))
-	return []Transaction{}
+	return getBlockByNumResponse.Transactions
 }
