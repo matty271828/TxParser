@@ -21,14 +21,15 @@ type Parser interface {
 
 // Represents a transaction on the ethereum blockchain.
 type Transaction struct {
-	// Hash of the transaction.
-	Hash string
-	// Address of the sender.
-	From string
-	// Address of the receiver.
-	To string
-	// Value of the transaction in ETH.
-	Value string
+	Address          string   `json:"address"`
+	BlockHash        string   `json:"blockHash"`
+	BlockNumber      string   `json:"blockNumber"`
+	Data             string   `json:"data"`
+	LogIndex         string   `json:"logIndex"`
+	Removed          bool     `json:"removed"`
+	Topics           []string `json:"topics"`
+	TransactionHash  string   `json:"transactionHash"`
+	TransactionIndex string   `json:"transactionIndex"`
 }
 
 type Manager struct {
@@ -52,7 +53,6 @@ func NewManager(
 
 // GetCurrentBlock returns the current block number.
 func (m *Manager) GetCurrentBlock() int {
-	// Create the JSON-RPC request
 	body, err := json.Marshal(map[string]interface{}{
 		"jsonrpc": "2.0",
 		"method":  "eth_blockNumber",
@@ -64,15 +64,13 @@ func (m *Manager) GetCurrentBlock() int {
 		return -1
 	}
 
-	// Send request using ethclient
 	response, err := m.ethClient.Execute(body)
 	if err != nil {
 		log.Printf("Error getting current block: %v", err)
 		return -1
 	}
 
-	// Handle response
-	result, ok := response["result"].(string)
+	result, ok := response.Result.(string)
 	if !ok {
 		log.Printf("Error parsing block number response: invalid format")
 		return -1
@@ -91,92 +89,57 @@ func (m *Manager) SubscribeAddress(address string) bool {
 
 // GetTransactions returns all transactions for a given address.
 func (m *Manager) GetTransactions(address string) []Transaction {
-	if address == "" {
-		log.Printf("Error: empty address provided")
-		return nil
-	}
-
-	// Create request to get logs for the address (both incoming and outgoing)
-	params := map[string]interface{}{
+	// Create filter with properly formatted hex values
+	body, err := json.Marshal(map[string]interface{}{
 		"jsonrpc": "2.0",
 		"method":  "eth_getLogs",
 		"params": []interface{}{
 			map[string]interface{}{
-				"fromBlock": "0x0",
-				"toBlock":   "latest",
-				"address":   address,
+				"address": address,
 			},
 		},
 		"id": 1,
-	}
-
-	body, err := json.Marshal(params)
+	})
 	if err != nil {
-		log.Printf("Error marshaling transaction request: %v", err)
+		log.Printf("Error marshaling logs request: %v", err)
 		return nil
 	}
+
+	log.Printf("Sending request: %s", string(body))
 
 	response, err := m.ethClient.Execute(body)
 	if err != nil {
-		log.Printf("Error getting transactions: %v", err)
+		log.Printf("Error getting logs: %v", err)
 		return nil
 	}
 
-	return m.parseTransactions(response)
-}
+	var logs []Transaction
+	logsData, err := json.Marshal(response.Result)
+	if err != nil {
+		log.Printf("Error marshaling logs data: %v", err)
+		return nil
+	}
 
-// parseTransactions converts a JSON-RPC response into a slice of transactions.
-// Returns nil if the response cannot be parsed.
-func (m *Manager) parseTransactions(response map[string]interface{}) []Transaction {
-	result, ok := response["result"].([]interface{})
-	if !ok {
+	if err := json.Unmarshal(logsData, &logs); err != nil {
+		log.Printf("Error unmarshaling logs: %v", err)
 		return nil
 	}
 
 	var transactions []Transaction
-	for _, tx := range result {
-		txMap, ok := tx.(map[string]interface{})
-		if !ok {
-			continue
-		}
-
-		// Extract transaction hash from the log
-		hash, ok := txMap["transactionHash"].(string)
-		if !ok {
-			continue
-		}
-
-		// Create additional request to get full transaction details
-		params := map[string]interface{}{
-			"jsonrpc": "2.0",
-			"method":  "eth_getTransactionByHash",
-			"params":  []interface{}{hash},
-			"id":      1,
-		}
-
-		body, err := json.Marshal(params)
-		if err != nil {
-			continue
-		}
-
-		txResponse, err := m.ethClient.Execute(body)
-		if err != nil {
-			continue
-		}
-
-		txResult, ok := txResponse["result"].(map[string]interface{})
-		if !ok {
-			continue
-		}
-
+	for _, log := range logs {
 		tx := Transaction{
-			Hash:  hash,
-			From:  txResult["from"].(string),
-			To:    txResult["to"].(string),
-			Value: txResult["value"].(string),
+			Address:          log.Address,
+			BlockHash:        log.BlockHash,
+			BlockNumber:      log.BlockNumber,
+			Data:             log.Data,
+			LogIndex:         log.LogIndex,
+			Topics:           log.Topics,
+			TransactionHash:  log.TransactionHash,
+			TransactionIndex: log.TransactionIndex,
 		}
 		transactions = append(transactions, tx)
 	}
 
-	return transactions
+	log.Printf("Found %d transactions", len(transactions))
+	return []Transaction{}
 }

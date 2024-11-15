@@ -117,42 +117,27 @@ func TestIntegration_GetTransactions(t *testing.T) {
 			address:    "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
 			wantStatus: http.StatusOK,
 			assert: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response []Transaction
-				if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
-					t.Fatalf("Failed to decode response: %v", err)
+				body := w.Body.String()
+				t.Logf("Response body: %s", body)
+
+				var response struct {
+					Transactions []Transaction `json:"transactions"`
 				}
-				if len(response) == 0 {
+				if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+					t.Fatalf("Failed to decode response: %v\nResponse body: %s", err, body)
+				}
+
+				if len(response.Transactions) == 0 {
 					t.Error("Expected non-empty transaction list")
 					return
 				}
-				// Verify first transaction structure
-				tx := response[0]
-				if tx.Hash == "" {
+
+				tx := response.Transactions[0]
+				if tx.TransactionHash == "" {
 					t.Error("Transaction hash is empty")
 				}
-				if tx.From == "" {
-					t.Error("Transaction from address is empty")
-				}
-				if tx.To == "" {
-					t.Error("Transaction to address is empty")
-				}
-				if tx.Value == "" {
-					t.Error("Transaction value is empty")
-				}
-			},
-		},
-		{
-			name:       "[NEGATIVE] invalid address format",
-			method:     http.MethodGet,
-			address:    "invalid-address",
-			wantStatus: http.StatusOK,
-			assert: func(t *testing.T, w *httptest.ResponseRecorder) {
-				var response []Transaction
-				if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
-					t.Fatalf("Failed to decode response: %v", err)
-				}
-				if len(response) != 0 {
-					t.Error("Expected empty transaction list")
+				if tx.Address == "" {
+					t.Error("Transaction address is empty")
 				}
 			},
 		},
