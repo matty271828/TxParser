@@ -113,6 +113,8 @@ func (m *Manager) GetTransactions(address string) []Transaction {
 		return nil
 	}
 
+	// TODO: Iterate through all blocks and get transactions
+
 	blockNumHex := fmt.Sprintf("0x%x", currentBlock)
 	body, err := json.Marshal(map[string]interface{}{
 		"jsonrpc": "2.0",
@@ -149,6 +151,8 @@ func (m *Manager) GetTransactions(address string) []Transaction {
 	if len(getBlockByNumResponse.Transactions) == 0 {
 		return []Transaction{}
 	}
+
+	// TODO: Filter transactions for the specific address
 
 	return getBlockByNumResponse.Transactions
 }
