@@ -55,7 +55,7 @@ func (s *Server) HandleSubscribe(w http.ResponseWriter, r *http.Request) {
 
 	success := s.parser.SubscribeAddress(address)
 	if !success {
-		http.Error(w, "Failed to subscribe to address", http.StatusInternalServerError)
+		http.Error(w, "Address already subscribed", http.StatusInternalServerError)
 		return
 	}
 
